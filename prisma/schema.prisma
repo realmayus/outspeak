@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VoiceType {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  ADMIN
+  MODERATOR
+}
+
+enum VoteType {
+  UPVOTE
+  DOWNVOTE
+  NEUTRAL
+}
+
+model User {
+  id                  Int             @id @default(autoincrement())
+  email               String          @unique
+  username            String          @unique
+  password            String
+  createdAt           DateTime        @default(now())
+  verifiedEmail       Boolean         @default(false)
+  verificationToken   String?         @unique
+  authToken           String?
+  roles               Role[]
+  voiceType           VoiceType?
+  geohash             String
+  nativeLanguages     Language[]
+  karma               Int            @default(0)
+  addedPronunciations Pronunciation[]
+  votes               Vote[]
+}
+
+model Language {
+  id             String @id
+  words          Word[]
+  nativeSpeakers User[]
+}
+
+model Word {
+  id             Int             @id @default(autoincrement())
+  word           String          @unique
+  language       Language        @relation(fields: [languageId], references: [id])
+  languageId     String
+  pronunciations Pronunciation[]
+}
+
+model Pronunciation {
+  id        Int      @id @default(autoincrement())
+  word      Word     @relation(fields: [wordId], references: [id])
+  wordId    Int
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  createdAt DateTime @default(now())
+  flagged   Boolean  @default(false)
+  votes     Vote[]
+}
+
+model Vote {
+  id              Int           @id @default(autoincrement())
+  user            User          @relation(fields: [userId], references: [id])
+  userId          Int
+  voteType        VoteType
+  pronunciation   Pronunciation @relation(fields: [pronunciationId], references: [id])
+  pronunciationId Int
+}
