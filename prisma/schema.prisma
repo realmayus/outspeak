@@ -34,7 +34,7 @@ model User {
   createdAt           DateTime        @default(now())
   verifiedEmail       Boolean         @default(false)
   verificationToken   String?         @unique
-  authToken           String?
+  authToken           String?         @unique
   roles               Role[]
   voiceType           VoiceType?
   geohash             String
@@ -46,6 +46,8 @@ model User {
 
 model Language {
   id             String @id
+  name           String
+  aliases        String[]
   words          Word[]
   nativeSpeakers User[]
 }
